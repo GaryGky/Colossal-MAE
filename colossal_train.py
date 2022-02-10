@@ -1,39 +1,25 @@
 import argparse
+import datetime
 import os
 import time
 from pathlib import Path
+
 import colossalai
-from pathlib import Path
-
-import datetime
-from colossalai.logging import get_dist_logger
 import torch
-import os
-from colossalai.core import global_context as gpc
-from colossalai.utils import get_dataloader
-from torchvision import transforms
-from colossalai.nn.lr_scheduler import CosineAnnealingLR
-
-import numpy as np
-import timm
-import torch
-import torch.backends.cudnn as cudnn
 import torchvision.datasets as datasets
 import torchvision.transforms as transforms
-from torch.utils.tensorboard import SummaryWriter
-
-assert timm.__version__ == "0.3.2"  # version check
-
-import util.misc as misc
+from colossalai.core import global_context as gpc
+from colossalai.logging import get_dist_logger
+from colossalai.utils import get_dataloader
 
 import models_mae
 
 
 def get_args_parser():
     parser = argparse.ArgumentParser('MAE pre-training', add_help=False)
-    parser.add_argument('--batch_size', default=64, type=int,
-                        help='Batch size per GPU (effective batch size is batch_size * accum_iter * # gpus')
-    parser.add_argument('--epochs', default=400, type=int)
+    # parser.add_argument('--batch_size', default=64, type=int,
+    #                     help='Batch size per GPU (effective batch size is batch_size * accum_iter * # gpus')
+    # parser.add_argument('--epochs', default=400, type=int)
     parser.add_argument('--accum_iter', default=1, type=int,
                         help='Accumulate gradient iterations (for increasing the effective batch size under memory constraints)')
 
@@ -55,18 +41,18 @@ def get_args_parser():
     parser.add_argument('--weight_decay', type=float, default=0.05,
                         help='weight decay (default: 0.05)')
 
-    parser.add_argument('--lr', type=float, default=None, metavar='LR',
-                        help='learning rate (absolute lr)')
+    # parser.add_argument('--lr', type=float, default=None, metavar='LR',
+    #                     help='learning rate (absolute lr)')
     parser.add_argument('--blr', type=float, default=1e-3, metavar='LR',
                         help='base learning rate: absolute_lr = base_lr * total_batch_size / 256')
     parser.add_argument('--min_lr', type=float, default=0., metavar='LR',
                         help='lower lr bound for cyclic schedulers that hit 0')
-
-    parser.add_argument('--warmup_epochs', type=int, default=40, metavar='N',
-                        help='epochs to warmup LR')
+    #
+    # parser.add_argument('--warmup_epochs', type=int, default=40, metavar='N',
+    #                     help='epochs to warmup LR')
 
     # Dataset parameters
-    parser.add_argument('--data_path', default='/datasets01/imagenet_full_size/061417/', type=str,
+    parser.add_argument('--data_path', default='/data/imagenet/', type=str,
                         help='dataset path')
 
     parser.add_argument('--output_dir', default='./output_dir',
@@ -118,7 +104,7 @@ def forward_loss(engine, model, imgs, pred, mask):
 
 def main(args):
     # ./config.py refers to the config file we just created in step 1
-    colossalai.launch_from_torch(config='./config.py')
+    colossalai.launch_from_torch(config='./colossal-ai/config.py')
     logger = get_dist_logger()
     print('job dir: {}'.format(os.path.dirname(os.path.realpath(__file__))))
 
@@ -155,7 +141,7 @@ def main(args):
                                       )
 
     # define the model
-    model = models_mae.__dict__[args.model](norm_pix_loss=args.norm_pix_loss)
+    model = models_mae.__dict__[gpc.config.MODEL](norm_pix_loss=gpc.config.NORM_PIX_LOSS)
 
     # build criterion
     criterion = torch.nn.MSELoss()
@@ -183,7 +169,7 @@ def main(args):
     # # following timm: set wd as 0 for bias and norm layers
     # param_groups = optim_factory.add_weight_decay(model_without_ddp, args.weight_decay)
     # build optimizer
-    optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, betas=(0.9, 0.95))
+    optimizer = torch.optim.AdamW(model.parameters(), lr=gpc.config.LR, betas=(0.9, 0.95))
     print(optimizer)
     # loss_scaler = NativeScaler()
     #
