@@ -1,1 +1,1 @@
-torchrun --standalone --nproc_per_node=8 colossal_train.py --from_torch --config ./colossal-ai/config.py
+torchrun --standalone --nproc_per_node=8 colossal_train.py

@@ -1,6 +1,6 @@
 from colossalai.amp import AMP_TYPE
 
-TOTAL_BATCH_SIZE = 4096
+TOTAL_BATCH_SIZE = 256
 LR = 1.5e-4
 WEIGHT_DECAY = 0.05
 

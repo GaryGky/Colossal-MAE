@@ -1,6 +1,8 @@
 # Train MAE With Colossal-AI
 
-[![logo](/Users/kaiyuan.gan/code.nus.course/hpc-ai/ColossalAI/docs/images/Colossal-AI_logo.png)](https://www.colossalai.org/)
+<p align="center">
+  <img src="https://s3.bmp.ovh/imgs/2022/02/94289a0b64636172.png" width="800">
+</p>
 
 <div align="center">
    <h3> <a href="https://arxiv.org/abs/2110.14883"> Paper </a> | 
@@ -16,7 +18,7 @@
 An integrated large-scale model training system with efficient parallelization techniques.
 
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/11435359/146857310-f258c86c-fde6-48e8-9cee-badd2b21bd2c.png" width="300">
+  <img src="https://user-images.githubusercontent.com/11435359/146857310-f258c86c-fde6-48e8-9cee-badd2b21bd2c.png" width="400">
 </p>
 
 ## SetUp
@@ -84,7 +86,27 @@ MASK_RATIO=0.75
 
 ## Launch
 
-We provide an 
+In this experiment, we only run Colossal-AI with PyTorch
+
+Firstly, to load config from config.py:
+
+```
+colossalai.launch_from_torch(config='./colossal-ai/config.py')
+```
+
+Then, in python file, you can access previous defined parameters by: gpc.confg.${param}.
+
+Here is an example to tell train code to choose which model and whether use norm_pix_loss:
+
+```python
+model = models_mae.__dict__[gpc.config.MODEL](norm_pix_loss=gpc.config.NORM_PIX_LOSS)
+```
+
+After finishing your training code, then enjoy your training by using: 
+
+```
+$ torchrun --standalone --nproc_per_node=8 colossal_train.py
+```
 
 ## Cite us
 

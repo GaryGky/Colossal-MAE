@@ -182,7 +182,7 @@ def main(args):
                                                                          train_dataloader,
                                                                          )
 
-    print(f"Start training for {args.epochs} epochs")
+    print(f"Start training for {gpc.config.NUM_EPOCHS} epochs")
     start_time = time.time()
     for epoch in range(gpc.config.NUM_EPOCHS):
         # if args.distributed:
@@ -201,17 +201,17 @@ def main(args):
             engine.zero_grad()
 
             # run forward
-            pred, mask = engine(img)
+            outputs = engine(img)
 
+            _, pred, mask = outputs
             # forward loss
             loss = forward_loss(engine, model, img, pred, mask)
             # backward and update parameters
             engine.backward(loss)
             engine.step()
 
-        logger.info(
-            f"Epoch {epoch} - train loss: {loss.item():.5},  lr: {lr_scheduler.get_last_lr()[0]:.5g}",
-            ranks=[0])
+            logger.info(
+                f"Epoch {epoch} - train loss: {loss.item():.5},  lr: {optimizer.param_groups[0]['lr']:.5g}", ranks=[0])
 
         # save model
         # if args.output_dir and (epoch % 20 == 0 or epoch + 1 == args.epochs):
