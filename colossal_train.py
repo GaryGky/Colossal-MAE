@@ -203,7 +203,7 @@ def main(args):
             # run forward
             outputs = engine(img)
 
-            _, pred, mask = outputs
+            pred, mask = outputs
             # forward loss
             loss = forward_loss(engine, model, img, pred, mask)
             # backward and update parameters
