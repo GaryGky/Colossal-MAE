@@ -23,7 +23,7 @@ An integrated large-scale model training system with efficient parallelization t
 
 ## SetUp
 
-#### Install Colossal AI from source (Recomended)
+#### Install Colossal AI from source (Recommended)
 
 ```bash
 git clone https://github.com/hpcaitech/ColossalAI.git
